@@ -434,6 +434,9 @@ class SecOpsInstanceOrchestrator:
         for attempt in range(max_retries):
             try:
                 res = self.chronicle.create_retrohunt(rule_id, start_time, end_time)
+                if isinstance(res, dict) and "error" in res:
+                    raise APIError(res["error"].get("message", str(res["error"])))
+
                 op_name = res.get("name", "")
                 operation_id = op_name.split("/")[-1] if op_name else None
                 if not operation_id:

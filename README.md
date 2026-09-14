@@ -206,6 +206,47 @@ python3 retrohunt_batch.py \
 
 ---
 
+## Web UI Dashboard (Google Cloud Run)
+
+An interactive web dashboard built with Flask, Bootstrap 5 (Dark Mode), and live polling is provided under `ui/` to visualize batch retrohunt execution, quota consumption, and detection results across tenants in real time.
+
+### Features
+* **Live KPI Cards**: Displays real-time counts of Target Tenants, Total Queued Rules, Completed Jobs, Active Jobs, and Total Detections.
+* **Tenant Auto-Discovery**: Dynamically fetches child tenants from Google SecOps using the Customer Management / Partner API.
+* **Active Execution Matrix**: Shows live running jobs per tenant with rule IDs, elapsed time, and animated status badges.
+* **Job Results Table**: Real-time tabular breakdown showing status (`DONE`, `FAILED`, `TIMEOUT`), execution duration, and detection counts per rule.
+* **Live Log Stream**: Terminal log console updating automatically with server-side events and Chronicle status transitions.
+
+### Running Locally
+```bash
+export PARENT_INSTANCE_ID="YOUR_PARENT_INSTANCE_ID"
+export PARENT_PROJECT_ID="YOUR_PARENT_PROJECT_ID"
+export SECOPS_REGION="asia-southeast1"
+export GOOGLE_APPLICATION_CREDENTIALS="/path/to/service_account.json"
+
+pip install -r requirements.txt flask gunicorn
+python3 ui/app.py
+```
+Open `http://localhost:8080` in your browser.
+
+### Deploying to Google Cloud Run
+```bash
+# Build and push the container image
+gcloud builds submit --tag asia-southeast1-docker.pkg.dev/PROJECT_ID/REPO_NAME/secops-retrohunt-ui:latest
+
+# Deploy to Cloud Run with Secret Manager mounting the service account key
+gcloud run deploy secops-retrohunt-ui \
+  --image=asia-southeast1-docker.pkg.dev/PROJECT_ID/REPO_NAME/secops-retrohunt-ui:latest \
+  --region=asia-southeast1 \
+  --set-secrets=GOOGLE_APPLICATION_CREDENTIALS=secops-retrohunt-sa-key:latest \
+  --service-account=secops-retrohunt-sa@PROJECT_ID.iam.gserviceaccount.com \
+  --no-cpu-throttling \
+  --min-instances=1 \
+  --allow-unauthenticated
+```
+
+---
+
 ## CLI Reference
 
 | Parameter | Type | Default | Description |
