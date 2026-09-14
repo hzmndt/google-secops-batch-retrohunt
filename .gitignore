@@ -1,0 +1,28 @@
+# Byte-compiled / optimized / DLL files
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Output files, checkpoints & reports
+*.json
+*.csv
+!example_*.json
+!example_*.csv
+retrohunt_checkpoint*.json
+
+# Credentials and keys
+service_account*.json
+credentials*.json
+*.key
+*.pem
+credentials/
+
+# Virtual environments
+.env
+.venv
+env/
+venv/
+ENV/
+
+# Logs
+*.log

@@ -1,0 +1,4 @@
+secops>=0.26.0
+urllib3>=2.2.2
+requests>=2.31.0
+google-auth>=2.0.0
