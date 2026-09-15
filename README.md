@@ -229,7 +229,7 @@ python3 retrohunt_batch.py \
   --customer-id "YOUR_CUSTOMER_ID" \
   --project-id "YOUR_PROJECT_ID" \
   --region "asia-southeast1" \
-  --rule-ids "ru_ca82e120-ad18-4694-b1eb-0d3cb1ed7b57,ru_72ed5bbb-199d-46c3-bc3a-62af06932ae8" \
+  --rule-ids "ru_11111111-2222-3333-4444-555555555555,ru_66666666-7777-8888-9999-000000000000" \
   --hours 24
 ```
 
@@ -240,17 +240,17 @@ python3 retrohunt_batch.py \
 The orchestrator was verified against live enterprise Google SecOps environments, validating customer inventory discovery, scoped data access, safe-mode alerting toggles, quota management (≤3 concurrent jobs), and detection retrieval:
 
 ### Environment Test Configuration
-* **GCP Project ID**: `apac-workshop-1`
-* **GCP Project Number**: `678335183637`
-* **Customer ID**: `08189574-f559-4428-92dd-0314f7723c6f`
+* **GCP Project ID**: `sample-secops-project`
+* **GCP Project Number**: `123456789012`
+* **Customer ID**: `00000000-0000-0000-0000-000000000000`
 * **Region**: `asia-southeast1`
 * **API Endpoint**: `https://asia-southeast1-chronicle.googleapis.com`
 
 ### 1. Discovery & Dry-Run Preview
 ```bash
 python3 retrohunt_batch.py \
-  --customer-id "08189574-f559-4428-92dd-0314f7723c6f" \
-  --project-id "apac-workshop-1" \
+  --customer-id "00000000-0000-0000-0000-000000000000" \
+  --project-id "sample-secops-project" \
   --region "asia-southeast1" \
   --use-instance-rules \
   --limit 5 \
@@ -264,11 +264,11 @@ python3 retrohunt_batch.py \
 ---------------------------------------------------------------------------------------------------
 INSTANCE                  | RULE NAME                           | STATUS    | DETECTIONS | DURATION
 ---------------------------------------------------------------------------------------------------
-Instance-08189574         | test_gti_ioc_domain_alert           | DRY_RUN   | 0          | 0.0    s
-Instance-08189574         | test_gti_ioc_hostname_match         | DRY_RUN   | 0          | 0.0    s
-Instance-08189574         | test_cross_instance_alert_verific.. | DRY_RUN   | 0          | 0.0    s
-Instance-08189574         | Test_Composite_Rule_Detections_V2   | DRY_RUN   | 0          | 0.0    s
-Instance-08189574         | Test_Sub_Rule_2_Process             | DRY_RUN   | 0          | 0.0    s
+Instance-Tenant01         | test_gti_ioc_domain_alert           | DRY_RUN   | 0          | 0.0    s
+Instance-Tenant01         | test_gti_ioc_hostname_match         | DRY_RUN   | 0          | 0.0    s
+Instance-Tenant01         | test_cross_instance_alert_verific.. | DRY_RUN   | 0          | 0.0    s
+Instance-Tenant01         | Test_Composite_Rule_Detections_V2   | DRY_RUN   | 0          | 0.0    s
+Instance-Tenant01         | Test_Sub_Rule_2_Process             | DRY_RUN   | 0          | 0.0    s
 ---------------------------------------------------------------------------------------------------
 TOTAL INSTANCES: 1 | TOTAL RUNS: 5
 OUTCOMES: Done: 0, Dry-Run: 5, Failed: 0, Skipped: 0, Timeout: 0
@@ -277,16 +277,16 @@ OUTCOMES: Done: 0, Dry-Run: 5, Failed: 0, Skipped: 0, Timeout: 0
 ### 2. Live Retrohunt Execution
 ```bash
 python3 retrohunt_batch.py \
-  --customer-id "08189574-f559-4428-92dd-0314f7723c6f" \
-  --project-id "apac-workshop-1" \
+  --customer-id "00000000-0000-0000-0000-000000000000" \
+  --project-id "sample-secops-project" \
   --region "asia-southeast1" \
-  --rule-ids "ru_ca82e120-ad18-4694-b1eb-0d3cb1ed7b57" \
+  --rule-ids "ru_11111111-2222-3333-4444-555555555555" \
   --hours 2 \
-  --output-json apac_workshop_test.json \
-  --output-csv apac_workshop_test.csv
+  --output-json sample_retrohunt_test.json \
+  --output-csv sample_retrohunt_test.csv
 ```
 **Outcome**:
-* **Operation Initiated**: `oh_560eaa40-36f5-4908-a037-de1f7afbb3d1`
+* **Operation Initiated**: `oh_00000000-0000-0000-0000-000000000000`
 * **Safe Mode**: Verified and suppressed real-time alerting during retrohunt execution to protect downstream SOAR analysts.
 * **Polling & Lifecycle**: Transitioned `RUNNING` (0s) → `DONE` (10s) smoothly.
 * **Detections Retrieval**: Queried detections through `chronicle.legacies.legacySearchDetections`.
@@ -295,7 +295,7 @@ python3 retrohunt_batch.py \
 ---------------------------------------------------------------------------------------------------
 INSTANCE                  | RULE NAME                           | STATUS    | DETECTIONS | DURATION
 ---------------------------------------------------------------------------------------------------
-Instance-08189574         | test_gti_ioc_domain_alert           | DONE      | 0          | 21.4   s
+Instance-Tenant01         | test_gti_ioc_domain_alert           | DONE      | 0          | 21.4   s
 ---------------------------------------------------------------------------------------------------
 TOTAL INSTANCES: 1 | TOTAL RUNS: 1
 OUTCOMES: Done: 1, Dry-Run: 0, Failed: 0, Skipped: 0, Timeout: 0
