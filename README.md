@@ -44,7 +44,7 @@ Instead of manually collecting API keys or maintaining static lists of dozens of
 ### 2. Static Inventory File Support (JSON / CSV)
 For staged rollouts, pilots, or air-gapped change-control workflows:
 * Define tenant instances in `instances.json` or `instances.csv`.
-* Filter specific agencies or units using regex (`--instance-filter "(?i)finance"`).
+* Filter specific tenant units or divisions using regex (`--instance-filter "(?i)finance"`).
 * Cap execution to a pilot group (`--instance-limit 5`).
 
 ### 3. Unified Authentication Across All Tenants
@@ -62,7 +62,7 @@ A common challenge in SIEM automation is handling the concurrency limit:
   The orchestrator maintains an active worker pool sized to `--max-concurrent-per-instance 3`. As soon as **any** single retrohunt completes, the next rule in the queue is immediately dispatched. No manual verification, no idle worker slots, and no risk of exceeding the limit.
 
 ### Cross-Tenant Parallelism
-The 3-job concurrency limit is scoped **per tenant instance**. Tenant A executing 3 retrohunts does not consume the quota of Tenant B. The orchestrator allows cross-instance concurrency via `--max-parallel-instances` (default `3` to `5`), allowing multiple agencies to be processed in parallel.
+The 3-job concurrency limit is scoped **per tenant instance**. Tenant A executing 3 retrohunts does not consume the quota of Tenant B. The orchestrator allows cross-instance concurrency via `--max-parallel-instances` (default `3` to `5`), allowing multiple tenant instances to be processed in parallel.
 
 ---
 
@@ -92,7 +92,7 @@ When automating retrohunts across dozens of instances and hundreds of rules, the
 | :--- | :--- | :--- |
 | **Partner Discovery** | `chronicle.tenants.list` | Discovers all child tenant instances from the parent instance. |
 | | `chronicle.instances.get` | Validates instance health and location settings. |
-| **Data Access Scopes** | `chronicle.dataAccessScopes.permit` | **CRITICAL**: Authorizes access to rules and logs bound to custom Data Access Scopes (e.g. `HAC`, CrowdStrike). Without this, scoped rules return HTTP 403 *"user does not have access to scope"*. |
+| **Data Access Scopes** | `chronicle.dataAccessScopes.permit` | **CRITICAL**: Authorizes access to rules and logs bound to custom Data Access Scopes (e.g. `Scope_Restricted_Endpoints`, `Scope_Finance_Data`). Without this, scoped rules return HTTP 403 *"user does not have access to scope"*. |
 | | `chronicle.globalDataAccessScopes.permit` | Authorizes access to rules and logs in the default/global scope (`Scope: None`). |
 | | `chronicle.dataAccessScopes.list` | Lists and verifies configured scopes across the instance. |
 | **Retrohunts** | `chronicle.retrohunts.create` | Initiates the retrohunt job for a rule over historical logs. |
@@ -190,11 +190,11 @@ python3 retrohunt_batch.py \
 ```
 
 ### 3. Filter Specific Tenant Instances (Regex)
-Target only specific agencies or ministries from the inventory:
+Target only specific business units or divisions from the inventory:
 ```bash
 python3 retrohunt_batch.py \
   --instances-file example_instances.csv \
-  --instance-filter "Ministry of Finance" \
+  --instance-filter "Finance Division" \
   --rules-dir detection-rules/rules/community/aws \
   --limit 10 \
   --hours 48
