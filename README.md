@@ -92,6 +92,9 @@ When automating retrohunts across dozens of instances and hundreds of rules, the
 | :--- | :--- | :--- |
 | **Partner Discovery** | `chronicle.tenants.list` | Discovers all child tenant instances from the parent instance. |
 | | `chronicle.instances.get` | Validates instance health and location settings. |
+| **Data Access Scopes** | `chronicle.dataAccessScopes.permit` | **CRITICAL**: Authorizes access to rules and logs bound to custom Data Access Scopes (e.g. `HAC`, CrowdStrike). Without this, scoped rules return HTTP 403 *"user does not have access to scope"*. |
+| | `chronicle.globalDataAccessScopes.permit` | Authorizes access to rules and logs in the default/global scope (`Scope: None`). |
+| | `chronicle.dataAccessScopes.list` | Lists and verifies configured scopes across the instance. |
 | **Retrohunts** | `chronicle.retrohunts.create` | Initiates the retrohunt job for a rule over historical logs. |
 | | `chronicle.retrohunts.get` | Polls progress (`state`, `progressPercentage`) until completion. |
 | | `chronicle.retrohunts.list` | Inspects existing retrohunts across the instance. |
@@ -99,25 +102,30 @@ When automating retrohunts across dozens of instances and hundreds of rules, the
 | | `chronicle.rules.get` | Reads rule definitions and properties. |
 | | `chronicle.rules.create` | Automatically stages missing rules from YARA-L files in disabled state. |
 | | `chronicle.rules.delete` | Removes dynamically created rules when `--cleanup-created-rules` is set. |
+| | `chronicle.rules.listRevisions` | Reads and binds specific rule revision versions during retrohunt execution. |
+| | `chronicle.rules.verifyRuleText` | Validates YARA-L rule syntax during staging via `:verifyRuleText`. |
 | **Rule Deployments** | `chronicle.ruleDeployments.get` | Checks if alerting is enabled on the rule. |
 | | `chronicle.ruleDeployments.update` | Temporarily disables alerting in **Safe Mode** to avoid alert floods and restores it afterwards. |
-| **Detections** | `chronicle.detections.list` | Fetches historical detection results and timestamps for CSV/JSON reports. |
+| **Detections & Legacy APIs** | `chronicle.legacies.legacySearchDetections` | Fetches historical detection matches and timestamps for CSV/JSON reports. |
+| | `chronicle.legacies.legacyTestRuleStreaming` | Validates and streams rule evaluation across historical telemetry. |
 | **Operations** | `chronicle.operations.get` | Monitors long-running API operations for retrohunts. |
 
 ### IAM Role Configuration
 
-#### Option A: Predefined Role (Recommended)
-Grant **Chronicle API Editor** (`roles/chronicle.editor`) to the service account on the parent project and across the target tenant instances:
-* `roles/chronicle.editor` (**Chronicle API Editor**)
+#### Option A: Predefined Roles
+* **`roles/chronicle.admin` (Recommended for Full Access)**:
+  Contains all necessary permissions including `chronicle.dataAccessScopes.permit`. Best for central service accounts managing multi-tenant environments.
+* **`roles/chronicle.editor`**:
+  Contains rule and retrohunt execution permissions, but **lacks `chronicle.dataAccessScopes.permit`**. If your environment uses custom Data Access Scopes (e.g. Scoped Rules), you must also assign a custom role providing `chronicle.dataAccessScopes.permit`.
 
-#### Option B: Least-Privilege Custom Role
-In hardened environments, define a custom role:
+#### Option B: Least-Privilege Custom Role (Recommended for Automation)
+In hardened environments requiring least privilege, create a custom role with the verified 19 permissions:
 ```bash
 gcloud iam roles create SecOpsMultiTenantRetrohuntRunner \
-    --project="YOUR_PARENT_PROJECT_ID" \
+    --project="YOUR_PROJECT_ID" \
     --title="SecOps Multi-Tenant Retrohunt Runner" \
-    --description="Minimal permissions to discover tenants, run batch retrohunts, and collect detections" \
-    --permissions="chronicle.tenants.list,chronicle.instances.get,chronicle.rules.list,chronicle.rules.get,chronicle.rules.create,chronicle.rules.delete,chronicle.ruleDeployments.get,chronicle.ruleDeployments.update,chronicle.retrohunts.create,chronicle.retrohunts.get,chronicle.retrohunts.list,chronicle.detections.list,chronicle.operations.get" \
+    --description="Permissions to discover tenants, access scoped rules, run batch retrohunts, and collect detections" \
+    --permissions="chronicle.tenants.list,chronicle.instances.get,chronicle.dataAccessScopes.permit,chronicle.globalDataAccessScopes.permit,chronicle.dataAccessScopes.list,chronicle.rules.list,chronicle.rules.get,chronicle.rules.create,chronicle.rules.delete,chronicle.rules.listRevisions,chronicle.rules.verifyRuleText,chronicle.ruleDeployments.get,chronicle.ruleDeployments.update,chronicle.retrohunts.create,chronicle.retrohunts.get,chronicle.retrohunts.list,chronicle.legacies.legacySearchDetections,chronicle.legacies.legacyTestRuleStreaming,chronicle.operations.get" \
     --stage="GA"
 ```
 
