@@ -131,6 +131,54 @@ gcloud iam roles create SecOpsMultiTenantRetrohuntRunner \
 
 ---
 
+## Service Account Permission & Scope Diagnostic Tool
+
+Before launching long-running batch retrohunts, you can verify that your Service Account key possesses all required IAM permissions and Chronicle Data Access Scopes using `test_secops_permissions.py`:
+
+```bash
+# 1. Test using your target instances file (e.g. instances.csv) and probe a specific rule
+python3 test_secops_permissions.py \
+  --credentials-path path/to/service_account.json \
+  --instances-file instances.csv \
+  --rule-id "ru_11111111-2222-3333-4444-555555555555"
+
+# 2. Test a standalone instance directly
+python3 test_secops_permissions.py \
+  --credentials-path path/to/service_account.json \
+  --customer-id "00000000-0000-0000-0000-000000000000" \
+  --project-id "sample-secops-project" \
+  --region "asia-southeast1" \
+  --rule-id "ru_11111111-2222-3333-4444-555555555555"
+```
+
+### Diagnostic Output Example
+```
+===============================================================================================
+GOOGLE SECOPS PERMISSION & SCOPE DIAGNOSTIC REPORT
+===============================================================================================
+  Target Instance : Instance-Tenant01 (00000000-0000-0000-0000-000000000000)
+  GCP Project ID  : sample-secops-project | Region: asia-southeast1
+  Auth Identity   : sa-retrohunt@sample-secops-project.iam.gserviceaccount.com
+-----------------------------------------------------------------------------------------------
+DOMAIN             | IAM PERMISSION                             | STATUS  | DETAILS
+-----------------------------------------------------------------------------------------------
+Instance Health    | chronicle.instances.get                    | PASS    | Connected to instance...
+Data Scopes        | chronicle.globalDataAccessScopes.permit    | PASS    | Global/Default Scope access granted (Scope: None).
+Data Scopes        | chronicle.dataAccessScopes.permit          | PASS    | Access verified for 1 custom scope(s).
+Detection Rules    | chronicle.rules.list                       | PASS    | Successfully listed rules.
+Rule Staging       | chronicle.rules.verifyRuleText             | PASS    | Syntax validation (:verifyRuleText) succeeded.
+Rule Access        | chronicle.rules.get                        | PASS    | Successfully retrieved target rule.
+Safe Mode          | chronicle.ruleDeployments.get              | PASS    | Deployment state readable. Safe Mode can toggle alerting.
+Detections Search  | chronicle.legacies.legacySearchDetections  | PASS    | Detection search endpoint verified.
+Partner Discovery  | chronicle.tenants.list                     | PASS    | Customer Management Partner API verified.
+-----------------------------------------------------------------------------------------------
+✔ ALL REQUIRED PERMISSIONS & DATA ACCESS SCOPES ARE VERIFIED AND READY.
+```
+
+If any permission or scope is missing, the tool automatically outputs exact, copy-pasteable remediation steps for both **Google Cloud IAM** and the **Google SecOps Console UI**.
+
+---
+
 ## Step-by-Step Setup Guide
 
 ### 1. Clone Repository & Install Dependencies
