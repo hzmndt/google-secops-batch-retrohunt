@@ -136,19 +136,25 @@ gcloud iam roles create SecOpsMultiTenantRetrohuntRunner \
 Before launching long-running batch retrohunts, you can verify that your Service Account key possesses all required IAM permissions and Chronicle Data Access Scopes using `test_secops_permissions.py`:
 
 ```bash
-# 1. Test using your target instances file (e.g. instances.csv) and probe a specific rule
+# 1. Test using your target instances file with a rule filter (regex)
+python3 test_secops_permissions.py \
+  --credentials-path path/to/service_account.json \
+  --instances-file instances.csv \
+  --rule-filter "(?i)hac|mse"
+
+# 2. Test probing a specific rule ID for scope access
 python3 test_secops_permissions.py \
   --credentials-path path/to/service_account.json \
   --instances-file instances.csv \
   --rule-id "ru_11111111-2222-3333-4444-555555555555"
 
-# 2. Test a standalone instance directly
+# 3. Test a standalone instance directly
 python3 test_secops_permissions.py \
   --credentials-path path/to/service_account.json \
   --customer-id "00000000-0000-0000-0000-000000000000" \
   --project-id "sample-secops-project" \
   --region "asia-southeast1" \
-  --rule-id "ru_11111111-2222-3333-4444-555555555555"
+  --rule-filter "(?i)hac|mse"
 ```
 
 ### Diagnostic Output Example
